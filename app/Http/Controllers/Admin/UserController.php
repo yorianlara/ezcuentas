@@ -8,6 +8,7 @@ use App\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use DB;
 
 class UserController extends Controller
 {
@@ -31,36 +32,56 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'es_admin' => 'boolean',
-            'empresas' => 'nullable|array',
-            'empresas.*' => 'exists:empresas,id'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'es_admin' => 'boolean',
+                'empresas' => 'nullable|array',
+                'empresas.*' => 'exists:empresas,id'
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'es_admin' => $request->es_admin ?? false,
-            'activo' => true,
-        ]);
+            DB::beginTransaction();
 
-        // Asignar empresas al usuario
-        if ($request->empresas) {
-            foreach ($request->empresas as $empresaId) {
-                $user->empresas()->attach($empresaId, [
-                    'rol' => 'contador', // Rol por defecto
-                    'activo' => true,
-                    'fecha_inicio' => now()
-                ]);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'es_admin' => $request->es_admin ?? false,
+                'activo' => true,
+            ]);
+
+            // Asignar empresas al usuario
+            if ($request->empresas) {
+                foreach ($request->empresas as $empresaId) {
+                    $user->empresas()->attach($empresaId, [
+                        'rol' => 'contador', // Rol por defecto
+                        'activo' => true,
+                        'fecha_inicio' => now()
+                    ]);
+                }
             }
-        }
 
-        return redirect()->route('admin.usuarios.index')
-            ->with('success', 'Usuario creado exitosamente.');
+            DB::commit();
+
+            return  response()->json([
+                'success' => 'success',
+                'mensaje'=> 'Usuario creado exitosamente.',
+                'user' => $user,
+                'totalUsers' => User::count(),
+                'totalActivos' => User::where('activo', true)->count(),
+                'totalAdmin' => User::where('es_admin', true)->count()
+            ]);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            return response()->json([
+                'success' => 'error',
+                'mensaje'=> 'Error al crear el usuario.',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function show(User $user)
@@ -126,21 +147,43 @@ class UserController extends Controller
 
         return redirect()->route('admin.usuarios.index')
             ->with('success', 'Usuario actualizado exitosamente.');
+
+            // 'totalUsers' => User::count(),
+            //     'totalActivos' => User::where('activo', true)->count(),
+            //     'totalAdmin' => User::where('es_admin', true)->count()
     }
 
     public function destroy($id)
     {
-        // No permitir eliminar usuarios con empresas asociadas
-        $user= User::findOrFail($id);
+        try{
+            DB::beginTransaction();
+            $user= User::findOrFail($id);
 
-        if ($user->empresas()->count() > 0) {
-            return back()->with('error', 'No se puede eliminar un usuario con empresas asociadas.');
+            if ($user->empresas()->count() > 0) {
+                throw new \Exception('No se puede eliminar un usuario con empresas asociadas.');
+            }
+
+            $user->delete();
+
+            DB::commit();
+
+            return  response()->json([
+                'success' => 'success',
+                'mensaje'=> 'Usuario eliminado exitosamente.',
+                'user' => $user,
+                'totalUsers' => User::count(),
+                'totalActivos' => User::where('activo', true)->count(),
+                'totalAdmin' => User::where('es_admin', true)->count()
+            ]);
         }
-
-        $user->delete();
-
-        return redirect()->route('admin.usuarios.index')
-            ->with('success', 'Usuario eliminado exitosamente.');
+        catch(\Exception $e){
+            DB::rollBack();
+            return  response()->json([
+                'success' => 'error',
+                'mensaje'=> 'Error al eliminar el usuario.',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function asignarEmpresa(Request $request, User $user)

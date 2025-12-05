@@ -48,7 +48,7 @@
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
                         <h5 class="text-muted fw-normal mt-0 text-truncate" title="Total Usuarios">Total Usuarios</h5>
-                        <h3 class="my-2 py-1"><span data-plugin="counterup">{{ $users->count() }}</span></h3>
+                        <h3 class="my-2 py-1"><span data-plugin="counterup" id="totalUsers">{{ $users->count() }}</span></h3>
                     </div>
                     <div class="avatar-sm">
                         <span class="avatar-title bg-soft-primary rounded">
@@ -66,7 +66,7 @@
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
                         <h5 class="text-muted fw-normal mt-0 text-truncate" title="Activos">Activos</h5>
-                        <h3 class="my-2 py-1"><span data-plugin="counterup">{{ $users->where('activo', true)->count() }}</span></h3>
+                        <h3 class="my-2 py-1"><span data-plugin="counterup" id="totalActivos">{{ $users->where('activo', true)->count() }}</span></h3>
                     </div>
                     <div class="avatar-sm">
                         <span class="avatar-title bg-soft-success rounded">
@@ -84,7 +84,7 @@
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
                         <h5 class="text-muted fw-normal mt-0 text-truncate" title="Deals">Administradores</h5>
-                        <h3 class="my-2 py-1"><span data-plugin="counterup">{{ $users->where('es_admin', true)->count() }}</span></h3>
+                        <h3 class="my-2 py-1"><span data-plugin="counterup" id="totalAdmin">{{ $users->where('es_admin', true)->count() }}</span></h3>
                     </div>
                     <div class="avatar-sm">
                         <span class="avatar-title bg-soft-warning rounded">
@@ -108,7 +108,6 @@
                     <div id="toolbar">
                         <a href="javascript:void(0)" class="btn btn-success mb-2" data-bs-toggle='tooltip' data-placement='top' title='Nuevo Usuario' onclick='crear()'>
                             <i class="mdi mdi-account-plus me-1"></i> 
-                            Nuevo Usuario
                         </a>
                     </div>
                 </div>
@@ -147,8 +146,7 @@
 
 @section('script')
 <script>
-    // Inicializar Bootstrap Table
-    $('#usersTable').bootstrapTable({
+    const $table = $('#usersTable').bootstrapTable({
         locale: 'es-ES',
         loadingTemplate: function(loadingMessage) {
             return '<i class="fa fa-spinner fa-spin fa-fw fa-2x"></i>';
@@ -174,8 +172,10 @@
         });
 
         $('#modalUsuarios').on('hide.bs.modal',function(){
+            $('#frmUsuarios')[0].reset();
             $('#id').val(null);
             $('#name').val(null);
+            $('#email').val(null);
             if($("#status").is(':checked')){
                 $("#status").trigger('click');
                 $('#lblstatus').text('Inactive');
@@ -193,41 +193,33 @@
             let form = $(this);
             if(!form[0].checkValidity())  return false;
 
-            let data = form.serialize();
+            //let data = form.serialize();
+            var data = new FormData(form[0]);
+            let uri = "{{ route('admin.usuarios.store') }}";
+            let method = "POST";
+            
+            let id = $('#id').val();
+            if(id!=''){
+                uri = "{{ route('admin.usuarios.update',':usuario') }}".replace(':usuario', id);
+                method = "PUT";
+                data.append('id', id);
+            }
 
-            sendRequest(uri, method, data, null, function (response) {
+            sendRequest(uri, method, data, function (response) {
                 showToast(response.mensaje, response.success );
-                $table.bootstrapTable('refresh');
                 if (response.success=="success") {
-                    $('#email').val('');
-                    if(response.correosMsgError && response.correosMsgError.length > 0){
-                        let errorMessage = response.correosMsgError.join('<br>');
-                        showToast(errorMessage, 'error',5000);
-                        $('#email').val(response.correosError.join('; '));
-                    }else{
-                        $('#modalPreregistro').modal('hide');
-                    }
-                    
+                    $table.bootstrapTable('refresh');
+                    $('#totalUsers').text(response.totalUsers);
+                    $('#totalActivos').text(response.totalActivos);
+                    $('#totalAdmin').text(response.totalAdmin);
+                    $('#modalUsuarios').modal('hide');
                 }
             });
-
-
-            $.post('{{ route("admin.usuarios.store")}}',{"id":id,"name":name,"status":status,"_token":token})
-            .done(function(data){
-                showToast(data.msg,data.success);
-                $('#modalUsuarios').modal('hide');
-                $table.bootstrapTable('refresh');
-            })
-            .fail(function(daterror) {
-                console.log(daterror);
-                showToast('An error occurred while processing the data',"error");
-            })
         });
 
         getEmpresas();
     });
 
-    // Formateadores para Bootstrap Table
     function empresasFormatter(value, row, index) {
         return `<span class="badge bg-primary rounded-pill">${value}</span>`;
     }
@@ -236,7 +228,7 @@
         if (value) {
             return `<span class="badge bg-warning">Administrador</span>`;
         }
-        return `<span class="badge bg-secondary">Usuario</span>`;
+        return `<span class="badge bg-info">Usuario</span>`;
     }
 
     function statusFormatter(value, row, index) {
@@ -252,37 +244,37 @@
     }
 
     function actionFormatter(value, row, index) {
-        var buttons ="<ul class='list-inline mb-0'>"+
-                        "<li class='list-inline-item'>"+
-                            "<a href='javascript:void(0)' class='action-icon text-warning' data-bs-toggle='tooltip' data-placement='top' title='Editar' onclick='editar("+row.id+")' >"+
-                                "<i class='mdi mdi-file-edit'></i>"+
-                            "</a>"+
-                        "</li>"+
-                        "<li class='list-inline-item'>"+
-                            "<a href='javascript:void(0)' class='action-icon text-danger' data-bs-toggle='tooltip' data-placement='top' title='Eliminar' onclick='eliminar("+row.id+")' >"+
-                                "<i class='mdi mdi-delete'></i>"+
-                            "</a>"+
-                        "</li>"+
-                    "</ul>";
+        var buttons =`<ul class='list-inline mb-0'>
+                        <li class='list-inline-item'>
+                            <a href='javascript:void(0)' class='action-icon text-warning' data-bs-toggle='tooltip' data-placement='top' title='Editar' onclick='editar(${row.id})' >
+                                <i class='mdi mdi-file-edit'></i>
+                            </a>
+                        </li>
+                        <li class='list-inline-item'>
+                            <a href='javascript:void(0)' class='action-icon text-danger' data-bs-toggle='tooltip' data-placement='top' title='Eliminar' onclick='eliminar(${row.id})' >
+                                <i class='mdi mdi-delete'></i>
+                            </a>
+                        </li>
+                    </ul>`;
         return buttons;
     }
 
-function getEmpresas() {
-    let url = "{{ route('admin.empresas.listar') }}?activo=1";
-    sendRequest(url, 'GET', null, function(response) {
-        console.log(response);
-        if (response && response.length > 0) {
-            let options;
-            response.forEach(empresa => {
-                options += `<option value="${empresa.id}">${empresa.nombre}</option>`;
-            });
-            $('#empresas').html(options);
-            
-        } else {
-            $('#empresas').html('<option value="">No hay empresas disponibles</option>');
-        }
-    });
-}
+    function getEmpresas() {
+        let url = "{{ route('admin.empresas.listar') }}?activo=1";
+        sendRequest(url, 'GET', null, function(response) {
+            console.log(response);
+            if (response && response.length > 0) {
+                let options;
+                response.forEach(empresa => {
+                    options += `<option value="${empresa.id}">${empresa.nombre}</option>`;
+                });
+                $('#empresas').html(options);
+                
+            } else {
+                $('#empresas').html('<option value="">No hay empresas disponibles</option>');
+            }
+        });
+    }
 
     function crear() {
         $('#modalUsuarios').modal('show');
@@ -293,36 +285,34 @@ function getEmpresas() {
         
         $('#id').val($row.id);
         $('#name').val($row.name);
-        if ($row.status){
-            $('#status').trigger('click');
-            $('#lblstatus').text('Active');
-        }
+        $('#email').val($row.email);
+        $('#es_admin').prop('checked', $row.es_admin);
+        $('#activo').prop('checked', $row.activo);
         $('#modalUsuarios').modal('show');
     }
 
     async function eliminar(id) {
         let datos = $table.bootstrapTable('getRowByUniqueId', id);
-        let confirm = await confirmQuestion(`Sure to delete this record?<br><br>${datos.name}`)
+        let confirm = await confirmQuestion(`Seguro de Eliminar este usuario?<br><br>*${datos.name}*`)
         
         if(confirm)
         {
-            let token = "{{ csrf_token() }}";
-            let url = "{{ route('admin.usuarios.destroy', ['id' => ':ID']) }}".replace(':ID', id);
-            $.post(url,{"_token":token})
-            .done(function(data){
-                showToast(data.msg,data.success);
-                if(data.success == 'success'){
+            let url = "{{ route('admin.usuarios.destroy',':usuario')}}".replace(':usuario', id);
+            let method = "DELETE";
+
+            sendRequest(url, method, null, function (response) {
+                showToast(response.mensaje, response.success );
+                if (response.success=="success") {
                     $table.bootstrapTable('removeByUniqueId', id);
+                    $('#totalUsers').text(response.totalUsers);
+                    $('#totalActivos').text(response.totalActivos);
+                    $('#totalAdmin').text(response.totalAdmin);
                 }
-            })
-            .fail(function(daterror) {
-                console.log(daterror);
-                showToast('An error occurred while processing the data',"error");
-            })
+            });
         }
         else
         {
-            showToast('Record without changes','warning');
+            showToast('Registro sin cambios','warning');
         }
 
     }

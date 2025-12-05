@@ -77,7 +77,7 @@
             title: question,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Yes',
+            confirmButtonText: 'Si',
             cancelButtonText: 'No',
             buttonsStyling: false,
             customClass: {
@@ -119,7 +119,7 @@
             type: method,
             dataType: "json",
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
             },
             beforeSend: function () {
                 loadingSwal(true);
@@ -163,9 +163,9 @@
             .toString()
             .toLowerCase()
             .trim()
-            .replace(/\s+/g, '-')           // Reemplaza espacios con -
-            .replace(/[^\w\-]+/g, '')       // Elimina caracteres no válidos
-            .replace(/\-\-+/g, '-');        // Reemplaza múltiples - por uno
+            .replace(/\s+/g, '-')           
+            .replace(/[^\w\-]+/g, '')       
+            .replace(/\-\-+/g, '-');        
     }
 </script>
 @yield('script')

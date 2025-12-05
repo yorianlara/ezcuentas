@@ -39,36 +39,22 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // Gestión de Empresas
-    Route::prefix('empresas')->name('empresas.')->group(function () {
-        Route::get('/', [EmpresaController::class, 'index'])->name('index');
-        Route::get('/create', [EmpresaController::class, 'create'])->name('create');
-        Route::get('/listar', [EmpresaController::class, 'listar'])->name('listar');
-        Route::post('/', [EmpresaController::class, 'store'])->name('store');
-        Route::get('/{empresa}', [EmpresaController::class, 'show'])->name('show');
-        Route::get('/{empresa}/edit', [EmpresaController::class, 'edit'])->name('edit');
-        Route::put('/{empresa}', [EmpresaController::class, 'update'])->name('update');
-        Route::delete('/{empresa}', [EmpresaController::class, 'destroy'])->name('destroy');
-        
-        // Crear esquema para empresa
-        Route::post('/{empresa}/crear-esquema', [EmpresaController::class, 'crearEsquema'])->name('crear-esquema');
-    });
+    // Gestión de Empresas - CON resource
+    Route::resource('empresas', EmpresaController::class)->except(['show']);
+    Route::get('/listar', [EmpresaController::class, 'listar'])->name('empresas.listar');
+
+    // Ruta adicional fuera del resource
+    Route::post('empresas/{empresa}/crear-esquema', [EmpresaController::class, 'crearEsquema'])
+        ->name('empresas.crear-esquema');
     
-    // Gestión de Usuarios
-    Route::prefix('usuarios')->name('usuarios.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/list', [UserController::class, 'list'])->name('list');
-        Route::get('/create', [UserController::class, 'create'])->name('create');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::get('/{user}', [UserController::class, 'show'])->name('show');
-        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
-        Route::put('/{user}', [UserController::class, 'update'])->name('update');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
-        
-        // Asignar empresas a usuarios
-        Route::post('/{user}/asignar-empresa', [UserController::class, 'asignarEmpresa'])->name('asignar-empresa');
-        Route::delete('/{user}/remover-empresa/{empresa}', [UserController::class, 'removerEmpresa'])->name('remover-empresa');
-    });
+    // Gestión de Usuarios - CON resource + rutas adicionales
+    Route::resource('usuarios', UserController::class)->except(['show']);
+    // Rutas adicionales
+    Route::get('usuarios/list', [UserController::class, 'list'])->name('usuarios.list');
+    // Route::post('usuarios/{user}/asignar-empresa', [UserController::class, 'asignarEmpresa'])
+    //     ->name('usuarios.asignar-empresa');
+    // Route::delete('usuarios/{user}/remover-empresa/{empresa}', [UserController::class, 'removerEmpresa'])
+    //     ->name('usuarios.remover-empresa');
 });
 
 // Rutas de Empresa (requieren selección de empresa)
