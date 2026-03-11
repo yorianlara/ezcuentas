@@ -65,7 +65,9 @@ class AuthController extends Controller
     protected function redirectAfterLogin(User $user)
     {
         // Limpiar sesión de empresa anterior
-        Session::forget(['empresa_id', 'empresa_nombre', 'empresa_esquema']);
+        Session::forget('empresa_id');
+        Session::forget('empresa_nombre');
+        Session::forget('empresa_esquema');
 
         // Si es administrador, redirigir al panel admin
         if ($user->es_admin) {
@@ -90,7 +92,7 @@ class AuthController extends Controller
             Session::put('empresa_nombre', $empresa->nombre);
             Session::put('empresa_esquema', $empresa->esquema);
 
-            return redirect()->intended(route('dashboard.empresa'))
+            return redirect()->intended(route('dashboard'))
                 ->with('success', "Bienvenido a {$empresa->nombre}");
         }
 

@@ -76,7 +76,7 @@
         <div class="card widget-flat">
             <div class="card-body">
                 <div class="float-end">
-                    <i class="mdi mdi-account-circle widget-icon bg-primary-lighten text-primary"></i>
+                    <i class="mdi mdi-account-multiple widget-icon bg-primary-lighten text-primary"></i>
                 </div>
                 <h5 class="text-muted fw-normal mt-0" title="Total de Usuarios">Usuarios</h5>
                 <h3 class="mt-3 mb-3">{{ $stats['total_usuarios'] }}</h3>

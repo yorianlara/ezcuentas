@@ -33,7 +33,7 @@
                 <li class="menu-title">Navegacion</li>
                 
                 <li>
-                    <a href="{{ route('admin.dashboard') }}">
+                    <a href="#">
                         <i class="mdi mdi-24px mdi-view-dashboard"></i>
                         <span>Dashboard</span>
                     </a>
@@ -52,7 +52,7 @@
                 
                 <li>
                     <a href="#">
-                        <i class="mdi mdi-24px mdi-office-building-marker"></i>
+                        <i class="mdi mdi-24px mdi-factory"></i>
                         <span>Empresas</span>
                     </a>
                 </li>

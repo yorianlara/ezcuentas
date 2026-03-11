@@ -2,7 +2,7 @@
     <div class="modal fade" id="modalUsuarios" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form  class="needs-validation" novalidate id="frmUsuarios" >
+                <form id="frmUsuarios" novalidate>
                     @csrf
                     <input type="hidden" id="id" name="id">
                     <div class="modal-header">
@@ -36,7 +36,7 @@
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Contraseña <span class="text-danger" id="passwordRequired">*</span></label>
                                     <div class="input-group">
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese la contraseña" required>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese la contraseña">
                                         <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                             <i class="mdi mdi-eye"></i>
                                         </button>

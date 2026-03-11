@@ -15,15 +15,12 @@ class Empresa extends Model
     protected $fillable = [
         'codigo',
         'nombre',
-        'razon_social',
-        'tipo_documento_fiscal_id',
-        'numero_documento',
-        'pais',
+        'rif',
         'direccion',
         'telefono',
         'email',
-        'esquema',
-        'activo'
+        'activo',
+        'configuracion'
     ];
 
     protected $casts = [
@@ -46,11 +43,6 @@ class Empresa extends Model
     public function scopeActivo($query)
     {
         return $query->where('activo', true);
-    }
-
-    public function tipoDocumentoFiscal()
-    {
-        return $this->belongsTo(TipoDocumentoFiscal::class, 'tipo_documento_fiscal_id');
     }
 
     public function users()
