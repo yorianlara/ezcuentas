@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('periodos_contables', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('empresa_id')->constrained('empresas');
             $table->foreignId('ejercicio_fiscal_id')->constrained('ejercicios_fiscales');
             $table->string('nombre', 50); // Enero 2024, Febrero 2024, etc.
             $table->integer('mes'); // 1-12
@@ -29,7 +30,7 @@ return new class extends Migration
             $table->softDeletes();
             
             // Índices
-            $table->unique(['ejercicio_fiscal_id', 'mes']);
+            $table->unique(['empresa_id', 'ejercicio_fiscal_id', 'mes']);
             $table->index(['fecha_inicio', 'fecha_fin']);
             $table->index(['activo', 'cerrado', 'estado']);
         });

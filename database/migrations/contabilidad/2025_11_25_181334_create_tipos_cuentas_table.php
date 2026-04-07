@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('tipos_cuenta', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo', 10)->unique();
+            $table->foreignId('empresa_id')->constrained('empresas');
+            $table->string('codigo', 10);
             $table->string('nombre', 100);
             $table->string('naturaleza', 1); // D: Débito, C: Crédito
             $table->text('descripcion')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             
+            $table->unique(['empresa_id', 'codigo']);
             $table->index(['codigo', 'activo']);
         });
     }

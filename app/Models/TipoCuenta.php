@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Traits\BelongsToEmpresa;
+
 class TipoCuenta extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'tipos_cuenta';
 
     protected $fillable = [
+        'empresa_id',
         'codigo',
         'nombre',
         'naturaleza',

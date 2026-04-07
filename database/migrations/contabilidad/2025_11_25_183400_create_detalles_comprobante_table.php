@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('detalles_comprobante', function (Blueprint $table) {
             $table->id();
             $table->foreignId('comprobante_id')->constrained('comprobantes')->onDelete('cascade');
-            $table->foreignId('producto_id')->nullable()->constrained('productos');
+            $table->unsignedBigInteger('producto_id')->nullable();
             $table->foreignId('cuenta_contable_id')->constrained('cuentas_contables');
             
             // Descripción

@@ -5,13 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Traits\BelongsToEmpresa;
+
 class DetalleAsiento extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToEmpresa;
 
     protected $table = 'detalles_asiento';
 
     protected $fillable = [
+        'empresa_id',
         'asiento_contable_id',
         'cuenta_contable_id',
         'tercero_id',

@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('detalles_asiento', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('empresa_id')->constrained('empresas');
             $table->foreignId('asiento_contable_id')->constrained('asientos_contables')->onDelete('cascade');
             $table->foreignId('cuenta_contable_id')->constrained('cuentas_contables');
             $table->foreignId('tercero_id')->nullable()->constrained('terceros');
@@ -31,7 +32,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Índices
-            $table->index(['asiento_contable_id', 'cuenta_contable_id']);
+            $table->index(['empresa_id', 'asiento_contable_id', 'cuenta_contable_id']);
             $table->index(['cuenta_contable_id', 'created_at']);
             $table->index('tercero_id');
         });

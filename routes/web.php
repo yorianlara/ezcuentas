@@ -5,8 +5,20 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\EmpresaController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Empresa\SeleccionarEmpresaController;
-use App\Http\Controllers\Contabilidad\CuentaContableController;
-use App\Http\Controllers\Contabilidad\ComprobanteController;
+// Removed old controller import to avoid conflict with API version
+// use App\Http\Controllers\Contabilidad\CuentaContableController;
+// Removed old controller import to avoid conflict with API version
+// use App\Http\Controllers\Contabilidad\ComprobanteController;
+use App\Http\Controllers\Api\AsientoContableController;
+use App\Http\Controllers\Api\ReporteContableController;
+use App\Http\Controllers\Api\CuentaContableController;
+use App\Http\Controllers\Api\TerceroController;
+use App\Http\Controllers\Api\ComprobanteController;
+use App\Http\Controllers\Api\ImpuestoController;
+use App\Http\Controllers\Api\DashboardContableController;
+use App\Http\Controllers\Api\ConciliacionController;
+use App\Http\Controllers\Api\ProductoController;
+use App\Http\Controllers\Api\PagoController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas Públicas
@@ -101,6 +113,76 @@ Route::middleware(['auth'])->group(function () {
             // Route::get('/comprobantes/create', [ComprobanteController::class, 'create'])->name('comprobantes.create');
             // Route::post('/comprobantes', [ComprobanteController::class, 'store'])->name('comprobantes.store');
             // Route::get('/comprobantes/{comprobante}', [ComprobanteController::class, 'show'])->name('comprobantes.show');
+            
+            // Cuentas Contables API
+            Route::prefix('api/cuentas')->name('api.cuentas.')->group(function () {
+                Route::get('/', [CuentaContableController::class, 'index'])->name('index');
+                Route::get('/hojas', [CuentaContableController::class, 'leaves'])->name('leaves');
+            });
+
+            // Terceros API
+            Route::prefix('api/terceros')->name('api.terceros.')->group(function () {
+                Route::get('/', [TerceroController::class, 'index'])->name('index');
+                Route::get('/{id}', [TerceroController::class, 'show'])->name('show');
+                Route::post('/', [TerceroController::class, 'store'])->name('store');
+                Route::put('/{id}', [TerceroController::class, 'update'])->name('update');
+                Route::delete('/{id}', [TerceroController::class, 'destroy'])->name('destroy');
+            });
+
+            // Asientos Contables API
+            Route::prefix('api/asientos-contables')->name('api.asientos-contables.')->group(function () {
+                Route::get('/', [AsientoContableController::class, 'index'])->name('index');
+                Route::post('/', [AsientoContableController::class, 'store'])->name('store');
+                Route::get('/{id}', [AsientoContableController::class, 'show'])->name('show');
+                Route::put('/{id}', [AsientoContableController::class, 'update'])->name('update');
+                Route::delete('/{id}', [AsientoContableController::class, 'destroy'])->name('destroy');
+                Route::post('/{id}/aprobar', [AsientoContableController::class, 'aprobar'])->name('aprobar');
+            });
+
+            // Comprobantes API
+            Route::prefix('api/comprobantes')->name('api.comprobantes.')->group(function () {
+                Route::get('/', [ComprobanteController::class, 'index'])->name('index');
+                Route::get('/{id}', [ComprobanteController::class, 'show'])->name('show');
+                Route::post('/', [ComprobanteController::class, 'store'])->name('store');
+                Route::post('/{id}/aprobar', [ComprobanteController::class, 'aprobar'])->name('aprobar');
+            });
+
+            // Impuestos API
+            Route::prefix('api/impuestos')->name('api.impuestos.')->group(function () {
+                Route::get('/', [ImpuestoController::class, 'index'])->name('index');
+                Route::post('/calcular', [ImpuestoController::class, 'calcular'])->name('calcular');
+            });
+
+            // Dashboard Financiero
+            Route::get('api/dashboard-contable', [DashboardContableController::class, 'index'])->name('api.dashboard-contable.index');
+
+            // Conciliación Bancaria
+            Route::prefix('api/conciliacion')->name('api.conciliacion.')->group(function () {
+                Route::get('/cuentas', [ConciliacionController::class, 'cuentasBancarias'])->name('cuentas');
+                Route::post('/importar', [ConciliacionController::class, 'importar'])->name('importar');
+                Route::get('/{id}/sugerencias', [ConciliacionController::class, 'sugerencias'])->name('sugerencias');
+                Route::post('/conciliar', [ConciliacionController::class, 'conciliar'])->name('conciliar');
+            });
+
+            // Inventario
+            Route::prefix('api/inventario')->name('api.inventario.')->group(function () {
+                Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+                Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
+                Route::get('/productos/{id}/kardex', [ProductoController::class, 'kardex'])->name('productos.kardex');
+            });
+
+            // Cuentas por Pagar / Cobrar (Pagos)
+            Route::prefix('api/pagos')->name('api.pagos.')->group(function () {
+                Route::get('/deudas', [PagoController::class, 'deudas'])->name('deudas');
+                Route::post('/', [PagoController::class, 'store'])->name('store');
+                Route::get('/historial/{id}', [PagoController::class, 'historial'])->name('historial');
+            });
+
+            // Reportes Contables
+            Route::prefix('reportes')->name('reportes.')->group(function () {
+                Route::get('/libro-mayor', [ReporteContableController::class, 'libroMayor'])->name('libro-mayor');
+                Route::get('/balance-comprobacion', [ReporteContableController::class, 'balanceComprobacion'])->name('balance-comprobacion');
+            });
         });
     });
 });

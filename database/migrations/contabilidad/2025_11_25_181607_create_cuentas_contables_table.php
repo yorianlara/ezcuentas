@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('cuentas_contables', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('empresa_id')->constrained('empresas');
             $table->foreignId('tipo_cuenta_id')->constrained('tipos_cuenta');
             $table->foreignId('cuenta_padre_id')->nullable()->constrained('cuentas_contables');
             
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->softDeletes();
             
             // Índices críticos para performance
+            $table->index(['empresa_id', 'codigo']);
             $table->index(['cuenta_padre_id', 'activo']);
             $table->index(['es_cuenta_hoja', 'acepta_movimientos']);
             $table->index(['nivel', 'codigo']);

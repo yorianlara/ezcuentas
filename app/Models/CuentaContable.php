@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Traits\BelongsToEmpresa;
 
 class CuentaContable extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'cuentas_contables';
 
@@ -44,10 +45,7 @@ class CuentaContable extends Model
     ];
 
     // Relaciones
-    public function unidadNegocio(): BelongsTo
-    {
-        return $this->belongsTo(UnidadNegocio::class);
-    }
+
 
     public function tipoCuenta(): BelongsTo
     {

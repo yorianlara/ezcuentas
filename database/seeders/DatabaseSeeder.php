@@ -12,8 +12,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TipoDocumentoFiscalSeeder::class,
             UserSeeder::class,
-            //CuentasContablesSeeder::class,
-            // ... otros seeders
+            EmpresaSeeder::class,
+            PlanCuentasSeeder::class,
+            EjercicioFiscalSeeder::class,
+            TipoComprobanteSeeder::class,
         ]);
     }
 }

@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Traits\BelongsToEmpresa;
+
 class EjercicioFiscal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'ejercicios_fiscales';
 
@@ -34,10 +36,7 @@ class EjercicioFiscal extends Model
     ];
 
     // Relaciones
-    public function unidadNegocio()
-    {
-        return $this->belongsTo(UnidadNegocio::class);
-    }
+
 
     public function periodosContables()
     {

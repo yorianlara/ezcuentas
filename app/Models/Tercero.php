@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Traits\BelongsToEmpresa;
+
 class Tercero extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'terceros';
 
@@ -36,10 +38,7 @@ class Tercero extends Model
     ];
 
     // Relaciones
-    public function unidadNegocio()
-    {
-        return $this->belongsTo(UnidadNegocio::class);
-    }
+
 
     public function contactos()
     {

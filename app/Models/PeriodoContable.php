@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Traits\BelongsToEmpresa;
+
 class PeriodoContable extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'periodos_contables';
 
     protected $fillable = [
+        'empresa_id',
         'ejercicio_fiscal_id',
         'nombre',
         'mes',

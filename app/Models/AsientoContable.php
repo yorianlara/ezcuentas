@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Traits\BelongsToEmpresa;
 
 class AsientoContable extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToEmpresa;
 
     protected $table = 'asientos_contables';
 
@@ -46,10 +47,7 @@ class AsientoContable extends Model
         return $this->belongsTo(PeriodoContable::class);
     }
 
-    public function unidadNegocio()
-    {
-        return $this->belongsTo(UnidadNegocio::class);
-    }
+
 
     public function detalles(): HasMany
     {
@@ -113,9 +111,9 @@ class AsientoContable extends Model
             ->selectRaw('SUM(debe) as total_debe, SUM(haber) as total_haber')
             ->first();
 
-        $this->total_debe = $totales->total_debe ?? 0;
-        $this->total_haber = $totales->total_haber ?? 0;
-        $this->diferencia = $this->total_debe - $this->total_haber;
+        $this->total_debe = (float) ($totales->total_debe ?? 0);
+        $this->total_haber = (float) ($totales->total_haber ?? 0);
+        $this->diferencia = (float) ($this->total_debe - $this->total_haber);
         $this->save();
     }
 
@@ -130,9 +128,16 @@ class AsientoContable extends Model
             }
 
             // Validar que la fecha del asiento esté dentro del período
-            if ($asiento->fecha_asiento < $asiento->periodoContable->fecha_inicio || 
-                $asiento->fecha_asiento > $asiento->periodoContable->fecha_fin) {
-                throw new \Exception('La fecha del asiento está fuera del rango del período contable.');
+            // Usamos toDateString() para comparar solo las fechas YYYY-MM-DD
+            $fechaAsiento = $asiento->fecha_asiento->toDateString();
+            $fechaInicio = $asiento->periodoContable->fecha_inicio->toDateString();
+            $fechaFin = $asiento->periodoContable->fecha_fin->toDateString();
+
+            // DEBUG
+            // error_log("Asiento: $fechaAsiento | Inicio: $fechaInicio | Fin: $fechaFin");
+
+            if ($fechaAsiento < $fechaInicio || $fechaAsiento > $fechaFin) {
+                throw new \Exception("La fecha del asiento ($fechaAsiento) no está dentro del período contable (Inicio: $fechaInicio, Fin: $fechaFin, ID: " . $asiento->periodoContable->id . ")");
             }
         });
 
